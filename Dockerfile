@@ -9,7 +9,7 @@ COPY app ./app
 COPY components ./components
 COPY public ./public
 COPY lib ./lib
-COPY next.config.js ./
+COPY next.config.mjs ./
 COPY tsconfig.json ./
 COPY tailwind.config.ts ./
 COPY postcss.config.mjs ./
@@ -30,7 +30,7 @@ COPY --from=frontend-builder /app/public ./public
 COPY --from=frontend-builder /app/package*.json ./
 COPY --from=frontend-builder /app/node_modules ./node_modules
 COPY --from=frontend-builder /app/server.js ./
-COPY --from=frontend-builder /app/next.config.js ./
+COPY --from=frontend-builder /app/next.config.mjs ./
 
 # Set environment variables
 ENV NODE_ENV=production

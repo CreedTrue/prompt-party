@@ -144,49 +144,6 @@ function getRandomPrompt() {
   return prompts[Math.floor(Math.random() * prompts.length)];
 }
 
-function startNewRound(roomCode) {
-  const room = rooms[roomCode];
-  if (!room) {
-    console.log(`❌ Cannot start round: Room ${roomCode} not found`);
-    return;
-  }
-
-  room.currentRound++;
-  const newRound = {
-    prompt: getRandomPrompt(),
-    submissions: [],
-    judgeId: room.playerOrder[room.judgeIndex],
-    winner: null
-  };
-
-  room.rounds.push(newRound);
-  
-  // Rotate judge for next round
-  room.judgeIndex = (room.judgeIndex + 1) % room.playerOrder.length;
-  
-  const currentJudge = room.players.find(p => p.id === newRound.judgeId);
-  const nextJudge = room.players.find(p => p.id === room.playerOrder[room.judgeIndex]);
-
-  console.log('\n=== Starting New Round ===');
-  console.log(`Room: ${roomCode}`);
-  console.log(`Round Number: ${room.currentRound}`);
-  console.log(`Prompt: "${newRound.prompt}"`);
-  console.log(`Current Judge: ${currentJudge?.name} (${newRound.judgeId})`);
-  console.log(`Next Judge: ${nextJudge?.name} (${room.playerOrder[room.judgeIndex]})`);
-  console.log(`Player Order: ${room.playerOrder.join(', ')}`);
-  console.log('========================\n');
-
-  const roundStartData = {
-    roundNumber: room.currentRound,
-    prompt: newRound.prompt,
-    judgeId: newRound.judgeId,
-    players: room.players
-  };
-
-  console.log('Emitting round_start event with data:', roundStartData);
-  io.to(roomCode).emit('round_start', roundStartData);
-}
-
 // Generate a unique 4-character room code
 function generateRoomCode() {
   let code;
@@ -257,6 +214,50 @@ app.prepare().then(() => {
     const parsedUrl = parse(req.url, true);
     handle(req, res, parsedUrl);
   });
+
+  // Define startNewRound function here where io is accessible
+  function startNewRound(roomCode) {
+    const room = rooms[roomCode];
+    if (!room) {
+      console.log(`❌ Cannot start round: Room ${roomCode} not found`);
+      return;
+    }
+
+    room.currentRound++;
+    const newRound = {
+      prompt: getRandomPrompt(),
+      submissions: [],
+      judgeId: room.playerOrder[room.judgeIndex],
+      winner: null
+    };
+
+    room.rounds.push(newRound);
+    
+    // Rotate judge for next round
+    room.judgeIndex = (room.judgeIndex + 1) % room.playerOrder.length;
+    
+    const currentJudge = room.players.find(p => p.id === newRound.judgeId);
+    const nextJudge = room.players.find(p => p.id === room.playerOrder[room.judgeIndex]);
+
+    console.log('\n=== Starting New Round ===');
+    console.log(`Room: ${roomCode}`);
+    console.log(`Round Number: ${room.currentRound}`);
+    console.log(`Prompt: "${newRound.prompt}"`);
+    console.log(`Current Judge: ${currentJudge?.name} (${newRound.judgeId})`);
+    console.log(`Next Judge: ${nextJudge?.name} (${room.playerOrder[room.judgeIndex]})`);
+    console.log(`Player Order: ${room.playerOrder.join(', ')}`);
+    console.log('========================\n');
+
+    const roundStartData = {
+      roundNumber: room.currentRound,
+      prompt: newRound.prompt,
+      judgeId: newRound.judgeId,
+      players: room.players
+    };
+
+    console.log('Emitting round_start event with data:', roundStartData);
+    io.to(roomCode).emit('round_start', roundStartData);
+  }
 
   // Socket.IO connection handling
   io.on("connection", (socket) => {

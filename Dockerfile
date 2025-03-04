@@ -13,39 +13,24 @@ COPY next.config.js ./
 COPY tsconfig.json ./
 COPY tailwind.config.ts ./
 COPY postcss.config.mjs ./
+COPY server.js ./
 
 # Install dependencies and build
 RUN npm install
 RUN npm run build
-
-# Build stage for backend server
-FROM node:18-alpine AS backend-builder
-
-WORKDIR /app
-
-# Copy server files
-COPY server/package*.json ./
-COPY server/index.js ./
-
-# Install dependencies
-RUN npm install
 
 # Final stage
 FROM node:18-alpine AS runner
 
 WORKDIR /app
 
-# Copy built frontend
+# Copy built frontend and server
 COPY --from=frontend-builder /app/.next ./.next
 COPY --from=frontend-builder /app/public ./public
 COPY --from=frontend-builder /app/package*.json ./
 COPY --from=frontend-builder /app/node_modules ./node_modules
+COPY --from=frontend-builder /app/server.js ./
 COPY --from=frontend-builder /app/next.config.js ./
-
-# Copy backend
-COPY --from=backend-builder /app/index.js ./index.js
-COPY --from=backend-builder /app/node_modules ./node_modules
-COPY --from=backend-builder /app/package*.json ./
 
 # Set environment variables
 ENV NODE_ENV=production
@@ -55,4 +40,4 @@ ENV PORT=8080
 EXPOSE 8080
 
 # Start the server
-CMD ["node", "index.js"] 
+CMD ["node", "server.js"] 

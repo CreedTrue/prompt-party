@@ -32,14 +32,14 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.get('*', (req, res) => {
   // For the root path, serve the index page
   if (req.path === '/') {
-    res.sendFile(path.join(__dirname, '../.next/server/app/page.html'));
+    res.sendFile(path.join(__dirname, '../.next/server/app/page.js'));
   } else {
     // For other paths, try to serve the corresponding page
-    const filePath = path.join(__dirname, '../.next/server/app', req.path, 'page.html');
+    const filePath = path.join(__dirname, '../.next/server/app', req.path, 'page.js');
     res.sendFile(filePath, (err) => {
       if (err) {
         // If file not found, serve the index page
-        res.sendFile(path.join(__dirname, '../.next/server/app/page.html'));
+        res.sendFile(path.join(__dirname, '../.next/server/app/page.js'));
       }
     });
   }

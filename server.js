@@ -356,12 +356,30 @@ app.prepare().then(() => {
 
     // Start the game (only host can start)
     socket.on("start_game", ({ roomCode }) => {
+      console.log('Start game event received:', { roomCode, socketId: socket.id });
+      
       const room = rooms[roomCode];
-      if (!room || room.players.length < 2) return;
+      if (!room) {
+        console.log('Room not found:', roomCode);
+        return;
+      }
+      
+      if (room.players.length < 2) {
+        console.log('Not enough players to start game:', room.players.length);
+        return;
+      }
+
+      console.log('Starting game for room:', {
+        roomCode,
+        playerCount: room.players.length,
+        players: room.players.map(p => ({ id: p.id, name: p.name }))
+      });
 
       room.status = 'in_progress';
       // Shuffle player order for judge rotation
       room.playerOrder = room.playerOrder.sort(() => Math.random() - 0.5);
+      console.log('Shuffled player order:', room.playerOrder);
+      
       startNewRound(roomCode);
     });
 

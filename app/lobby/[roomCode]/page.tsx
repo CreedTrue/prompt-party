@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import socket from "../../utils/socket";
+import socket from "@/app/utils/socket";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,22 +31,28 @@ export default function LobbyPage() {
       return;
     }
 
+    console.log('Setting up lobby with:', { playerId, playerName, roomCode });
+
     // Handle player list updates
     socket.on("player_joined", (updatedPlayers: Player[]) => {
+      console.log('Player joined event received:', updatedPlayers);
       setPlayers(updatedPlayers);
       // Update host status based on player list
       const isCurrentPlayerHost = updatedPlayers[0]?.id === playerId;
       setIsHost(isCurrentPlayerHost);
+      console.log('Host status updated:', { isCurrentPlayerHost, playerId });
     });
 
     // Handle room closure (when host leaves)
     socket.on("room_closed", () => {
+      console.log('Room closed event received');
       alert("The host has left the game.");
       router.push("/");
     });
 
     // Handle game start
-    socket.on("round_start", () => {
+    socket.on("round_start", (data) => {
+      console.log('Round start event received:', data);
       router.push(`/game/${roomCode}`);
     });
 
@@ -55,6 +61,7 @@ export default function LobbyPage() {
       "join_room",
       { roomCode, playerName, playerId },
       (response: { error?: string; success?: boolean }) => {
+        console.log('Join room response:', response);
         if (response.error) {
           alert(response.error);
           router.push("/");
@@ -64,6 +71,7 @@ export default function LobbyPage() {
 
     // Cleanup function
     return () => {
+      console.log('Cleaning up lobby event listeners');
       socket.off("player_joined");
       socket.off("room_closed");
       socket.off("round_start");
@@ -71,8 +79,23 @@ export default function LobbyPage() {
   }, [roomCode, router]);
 
   const startGame = () => {
-    if (!isHost) return;
-    socket.emit("start_game", { roomCode });
+    console.log('Start game button clicked', { isHost, roomCode, players });
+    if (!isHost) {
+      console.log('Not the host, cannot start game');
+      return;
+    }
+    if (players.length < 2) {
+      console.log('Not enough players to start game');
+      return;
+    }
+    console.log('Emitting start_game event');
+    socket.emit("start_game", { roomCode }, (response: { error?: string }) => {
+      console.log('Start game response:', response);
+      if (response?.error) {
+        console.error('Error starting game:', response.error);
+        alert(response.error);
+      }
+    });
   };
 
   return (

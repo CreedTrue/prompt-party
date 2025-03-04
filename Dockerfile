@@ -8,10 +8,10 @@ COPY package*.json ./
 COPY app ./app
 COPY components ./components
 COPY public ./public
-COPY styles ./styles
-COPY utils ./utils
 COPY next.config.js ./
 COPY tsconfig.json ./
+COPY tailwind.config.ts ./
+COPY postcss.config.mjs ./
 
 # Install dependencies and build
 RUN npm install

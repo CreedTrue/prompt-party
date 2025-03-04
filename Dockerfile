@@ -40,6 +40,7 @@ COPY --from=frontend-builder /app/.next ./.next
 COPY --from=frontend-builder /app/public ./public
 COPY --from=frontend-builder /app/package*.json ./
 COPY --from=frontend-builder /app/node_modules ./node_modules
+COPY --from=frontend-builder /app/next.config.js ./
 
 # Copy backend
 COPY --from=backend-builder /app/index.js ./index.js

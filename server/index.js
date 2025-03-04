@@ -4,8 +4,13 @@ import { Server } from "socket.io";
 import cors from "cors";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const server = http.createServer(app);
@@ -18,6 +23,15 @@ const io = new Server(server, {
 
 app.use(cors());
 app.use(express.json());
+
+// Serve static files from the Next.js build
+app.use(express.static(path.join(__dirname, '../.next')));
+app.use(express.static(path.join(__dirname, '../public')));
+
+// Handle all other routes with Next.js
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../.next/server/app/index.html'));
+});
 
 // Game state structure
 const rooms = {
@@ -84,7 +98,7 @@ const prompts = [
   "The least effective way to train for a marathon",
   "A new pet species that should never exist",
   "The most unhelpful survival tip",
-  "A medieval torture device that’s oddly funny",
+  "A medieval torture device that's oddly funny",
   "The weirdest way to sign off an email",
   "A flavor of toothpaste that would be awful",
   "A superpower that would make life harder, not easier",

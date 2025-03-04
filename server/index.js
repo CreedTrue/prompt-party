@@ -25,12 +25,24 @@ app.use(cors());
 app.use(express.json());
 
 // Serve static files from the Next.js build
-app.use(express.static(path.join(__dirname, '../.next')));
+app.use(express.static(path.join(__dirname, '../.next/static')));
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Handle all other routes with Next.js
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../.next/server/app/index.html'));
+  // For the root path, serve the index page
+  if (req.path === '/') {
+    res.sendFile(path.join(__dirname, '../.next/server/app/page.html'));
+  } else {
+    // For other paths, try to serve the corresponding page
+    const filePath = path.join(__dirname, '../.next/server/app', req.path, 'page.html');
+    res.sendFile(filePath, (err) => {
+      if (err) {
+        // If file not found, serve the index page
+        res.sendFile(path.join(__dirname, '../.next/server/app/page.html'));
+      }
+    });
+  }
 });
 
 // Game state structure

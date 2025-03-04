@@ -8,6 +8,7 @@ COPY package*.json ./
 COPY app ./app
 COPY components ./components
 COPY public ./public
+COPY lib ./lib
 COPY next.config.js ./
 COPY tsconfig.json ./
 COPY tailwind.config.ts ./
